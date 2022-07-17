@@ -1,0 +1,52 @@
+{
+    "extensions.autoUpdate": false,
+    "update.enableWindowsBackgroundUpdates": false,
+
+    "debug.console.fontSize": 13,
+    "window.autoDetectColorScheme": true,
+    // 用户界面
+    "workbench.colorTheme": "Visual Studio Light - C++",
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#000000",
+        "editor.background": "#ffffff",
+        "breadcrumb.background": "#00000020",
+        "sideBar.background": "#F0F8FF70",
+        "panel.background": "#F0F8FF17",
+    },
+    // 编辑器
+    "editor.fontSize": 16,
+    "editor.renderWhitespace": "boundary",
+    "editor.formatOnType": true,
+    "editor.semanticTokenColorCustomizations": {
+        "rules": {
+            "method": { // 成员函数
+                "foreground": "#74531F"
+            },
+            "type":{ // 类型
+                "foreground": "#2B91AF"
+            },
+            "macro":{ // 宏
+                "foreground": "#BA55D3",
+            },
+            "string": { // 字符串
+                "foreground": "#A31515"
+            }
+        }
+    },
+    "editor.tokenColorCustomizations": {
+        "comments": { // 注释
+            "foreground": "#008000",
+        }
+    },
+    // 差异化对比
+    "diffEditor.ignoreTrimWhitespace": false,
+    "diffEditor.codeLens": true,
+    // cpp 插件
+    "C_Cpp.formatting": "vcFormat", // 仅在选择vcFormat工具格式化时生效
+    "C_Cpp.vcFormat.newLine.beforeOpenBrace.block": "sameLine",
+    "C_Cpp.vcFormat.space.afterKeywordsInControlFlowStatements": false,
+    "C_Cpp.inactiveRegionOpacity": 0.5,
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+}
