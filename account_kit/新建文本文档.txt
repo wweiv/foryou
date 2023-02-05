@@ -1,0 +1,47 @@
+
+1.generate-keypair : 生成密钥对（可由第3步一起生成），包括profile证书和app证书
+2.generate-csr : 生成证书签名请求
+3.generate-ca : 生成根CA/中间CA证书，如果密钥不存在，一起生成密钥
+4.generate-app-cert : 生成应用调试/发布证书
+5.generate-profile-cert : 生成profile调试/发布证书
+6.sign-profile : profile文件签名
+
+第一步：profile签名场景
+密钥对 --> 没有密钥库时自动生成 .p12    profile key | app key
+java -jar hap-sign-tool.jar generate-keypair -keyAlias "oh-profile-key" -keyPwd hw123456 -keyAlg ECC -keySize NIST-P-256 -keystoreFile "OpenHarmony.p12" -keystorePwd hw123456
+根证书 --> .ca
+java -jar hap-sign-tool.jar generate-ca -keyAlias "oh-root-ca" -keyPwd hw123456 -subject "C=CN,O=OpenHarmony,OU=OpenHarmony Community,CN=Root CA" -validity 365 -signAlg SHA384withECDSA -keystoreFile "OpenHarmony.p12" -keystorePwd hw123456 -outFile "RootCA.cer" -keyAlg ECC -keySize NIST-P-256
+中间证书 --> .ca  分为用于profile和app的两个证书
+java -jar hap-sign-tool.jar generate-ca -keyAlias "oh-sub-ca" -keyPwd hw123456 -subject "C=CN,O=OpenHarmony,OU=OpenHarmony Community,CN= Profile Signature Service CA" -validity 365 -issuerKeyAlias oh-root-ca -issuerKeyPwd hw123456 -issuer "C=CN,O=OpenHarmony,OU=OpenHarmony Community,CN=Root CA" -signAlg SHA384withECDSA -keystoreFile "OpenHarmony.p12" -keystorePwd hw123456 -outFile "SubCA.cer" -keyAlg ECC -keySize NIST-P-256
+profile证书 --> .pem
+java -jar hap-sign-tool.jar generate-profile-cert -keyAlias "oh-profile-key" -keyPwd hw123456 -subject "C=CN,O=OpenHarmony,OU=OpenHarmony Community,CN=Provision Profile Debug" -issuer "C=CN,O=OpenHarmony,OU=OpenHarmony Community,CN= Profile Signature Service CA" -issuerKeyAlias "oh-sub-ca" -issuerKeyPwd hw123456 -validity 365 -signAlg SHA256withECDSA -rootCaCertFile "RootCA.cer" -subCaCertFile "SubCA.cer" -keystoreFile "OpenHarmony.p12" -keystorePwd hw123456 -outFile "OpenHarmonyProfile.pem"
+profile文件签名 --> .p7b
+java -jar hap-sign-tool.jar sign-profile -mode localSign -keyAlias "oh-profile-key" -keyPwd hw123456 -profileCertFile "OpenHarmonyProfile.pem" -inFile "UnsgnedReleasedProfileTemplate.json" -signAlg SHA256withECDSA -keystoreFile  "OpenHarmony.p12" -keystorePwd hw123456 -outFile "SignedProfile.p7b"
+
+第二步：应用签名场景
+密钥对
+java -jar hap-sign-tool.jar generate-keypair -keyAlias "oh-app-key" -keyPwd hw123456 -keyAlg ECC -keySize NIST-P-256 -keystoreFile "OpenHarmony.p12" -keystorePwd hw123456
+app证书 -- .pem
+java -jar hap-sign-tool.jar generate-app-cert -keyAlias "oh-app-key" -keyPwd hw123456 -subject "C=CN,O=OpenHarmony,OU=OpenHarmony Community,CN=App Debug" -issuer "C=CN,O=OpenHarmony,OU=OpenHarmony Community,CN=Application Debug Signature Service CA" -issuerKeyAlias "oh-sub-ca" -issuerKeyPwd hw123456 -validity 365 -signAlg SHA256withECDSA -rootCaCertFile "RootCA.cer" -subCaCertFile "SubCA.cer" -keystoreFile "OpenHarmony.p12" -keystorePwd hw123456 -outFile "Application.pem"
+
+
+路径2：
+生成根CA/中间CA证书
+生成应用签名证书密钥对
+生成应用签名证书
+对profile文件进行签名
+对Hap包进行签名
+java -jar hap-sign-tool.jar generate-keypair -keyAlias "oh-app1-key-v1" -keyAlg "ECC"  -keySize "NIST-P-256" -keystoreFile "OpenHarmony.p12" -keyPwd "123456" -keystorePwd "123456"
+java -jar hap-sign-tool.jar generate-app-cert -keyAlias "oh-app1-key-v1" -signAlg "SHA256withECDSA"  -issuer "C=CN,O=OpenHarmony,OU=OpenHarmony Team,CN= OpenHarmony Application CA" -issuerKeyAlias "oh-app1-key-v1" -subject "C=CN,O=OpenHarmony,OU=OpenHarmony Team,CN=OpenHarmony Application Release" -keystoreFile "OpenHarmony.p12" -subCaCertFile "subCA.cer" -rootCaCertFile "rootCA.cer" -outForm "certChain" -outFile "app1.pem" -keyPwd "123456" -keystorePwd "123456" -issuerKeyPwd "123456" -validity "365"
+
+
+
+
+
+python 的字典是hash表，创建时计算哈希后排序，因此在遍历时可能与创建时的顺序不一致
+
+生成profile和app使用的密钥对
+生成根证书和中间证书
+生成profile证书和app证书
+对profile文件签名
+对app签名
